@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+    <form name="tablegen">
+        <label>Rows: <input type="text" name="rows" id="rows" /></label><br />
+        <label>Cols: <input type="text" name="cols" id="cols" /></label><br />
+        <label>String: <input type="text" name="string" id="string" /></label><br />
+        <input name="generate" type="button" value="Create Table!" onclick='createTable();' />
+    </form>
+    <div id="wrapper"></div>
+    <h1 id="encryptedheader" style="display: none;">encrypted code</h1>
+    <div id="encrypted"></div>
+    <button id="decryptbtn" style="display: none;" onclick="decrypte()">decrypt</button>
+    <div id="decrypt" style="display: none;"></div>
+    <script>
+        function Create2DArray(rows, columns) {
+            var x = new Array(rows);
+            for (var i = 0; i < rows; i++) {
+                x[i] = new Array(columns);
+            }
+            return x;
+        }
+         
+        function decrypte(){
+            document.getElementById('decrypt').style.display = 'block';
+            document.getElementById('decrypt').innerHTML = document.getElementById('string').value;
+        }
+
+        function createTable() {
+            var expecteddata = new Array(rows);
+            
+            var x = 0;
+            const string = document.getElementById('string').value;
+            const words = string.split('');
+            console.log(words[0]);
+            var num_rows = document.getElementById('rows').value;
+            var num_cols = document.getElementById('cols').value;
+            var arr = Create2DArray(num_rows,num_cols);
+           
+
+
+            var m = num_rows, n = num_cols;
+            var l = 0;
+            for (var i = 0; i < m; i++) {
+                for (var j = 0; j < n; j++) {
+                    
+                        if (i == j) {
+                            arr[i][j] = words[l++];
+                        }
+                        else{
+                            arr[i][j] = ' '; 
+                        }
+                }
+            }
+            if (m == n) {
+                for (var k = 0; k < m; k++) {
+                    var i = 0;
+                    var j = k + 1;
+                    do {
+                        arr[i][j] = words[l++];
+                        i = i + 1;
+                        j = j + 1;
+
+                    } while (j <= n - 1);
+                }
+            }
+            else {
+                for (var k = 0; k < m; k++) {
+                    var i = 0;
+                    var j = k + 1;
+                    do {
+                        if((words[l] == null )){
+                            arr[i][j] = ' ';
+                            l++;
+                        }
+                        else{
+                            arr[i][j] = words[l++];
+                        }
+                        
+
+                        i = i + 1;
+                        j = j + 1;
+
+                    } while ((i < m) && (j <= n - 1));
+                }
+            }
+
+            for (var i = 0; i < m; i++) {
+                for (var j = 0; j < n; j++) {
+                    console.log(arr[i][j]);
+                }
+            }
+
+            for (var i = 0; i < m; i++) {
+                for (var j = 0; j < n; j++) {
+                    if(i == j){
+                        expecteddata[x++] = arr[i][j];
+                    }
+                    if(j > i){
+                        expecteddata[x++] = arr[i][j]; 
+                    }
+                }
+            }
+            console.log(expecteddata.join( ));
+
+            
+
+
+
+            var theader = '<table border="1">\n';
+            var tbody = '';
+
+            for (var i = 0; i < num_rows; i++) {
+                tbody += '<tr>';
+                for (var j = 0; j < num_cols; j++) {
+                    tbody += '<td>';
+                    tbody += arr[i][j];
+                    tbody += '</td>'
+                }
+                tbody += '</tr>\n';
+            }
+            var tfooter = '</table>';
+            document.getElementById('wrapper').innerHTML = theader + tbody + tfooter;
+            document.getElementById('encryptedheader').style.display = 'block';
+            document.getElementById('decryptbtn').style.display = 'block';
+            document.getElementById('encrypted').innerHTML = expecteddata.join();
+        }
+    </script>
+</body>
+
+</html>
