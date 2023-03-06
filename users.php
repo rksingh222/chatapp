@@ -1,3 +1,9 @@
+<?php 
+session_start();
+if(!isset($_SESSION['unique_id'])){
+    header("location: login.php");
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -165,11 +171,18 @@
     <div class="wrapper">
         <section class="users">
             <header>
+                <?php 
+                   include_once "php/config.php";
+                   $sql = mysqli_query($conn, "SELECT * FROM users WHERE unique_id = {$_SESSION['unique_id']}");
+                   if(mysqli_num_rows($sql) > 0){
+                       $row = mysqli_fetch_assoc($sql);
+                   }
+                ?>
                 <div class="content">
-                    <img src="dog.gif" alt="">
+                    <img src="php/images/<?php echo $row['image']?>" alt="">
                     <div class="details">
-                        <span>Coding Nepal</span>
-                        <p>Active Now</p>
+                        <span><?php echo $row['fname'] . " " . $row['lname'] ?></span>
+                        <p><?php echo $row['status'] ?></p>
                     </div>
                 </div>
                 <a href="#" class="logout">Logout</a>
@@ -180,46 +193,8 @@
                 <button><i class="fa fa-search"></i></button>
             </div>
             <div class="users-list">
-                <a href="#">
-                    <div class="content">
-                        <img src="dog.gif" alt="">
-                        <div class="details">
-                            <span>Coding Nepal</span>
-                            <p>This is test message</p>
-                        </div>
-                    </div>
-                    <div class="status-dot"><i class="fa fa-circle"></i></div>
-                </a>
-                <a href="#">
-                    <div class="content">
-                        <img src="dog.gif" alt="">
-                        <div class="details">
-                            <span>Coding Nepal</span>
-                            <p>This is test message</p>
-                        </div>
-                    </div>
-                    <div class="status-dot"><i class="fa fa-circle"></i></div>
-                </a>
-                <a href="#">
-                    <div class="content">
-                        <img src="dog.gif" alt="">
-                        <div class="details">
-                            <span>Coding Nepal</span>
-                            <p>This is test message</p>
-                        </div>
-                    </div>
-                    <div class="status-dot"><i class="fa fa-circle"></i></div>
-                </a>
-                <a href="#">
-                    <div class="content">
-                        <img src="dog.gif" alt="">
-                        <div class="details">
-                            <span>Coding Nepal</span>
-                            <p>This is test message</p>
-                        </div>
-                    </div>
-                    <div class="status-dot"><i class="fa fa-circle"></i></div>
-                </a>
+               
+                
             </div>
         </section>
     </div>
@@ -227,12 +202,64 @@
     <script>
         const searchBar = document.querySelector(".users .search input");
         const searchBtn = document.querySelector(".users .search button");
+        usersList = document.querySelector(".users .users-list");
 
         searchBtn.onclick = ()=>{
             searchBar.classList.toggle("active");
             searchBar.focus();
             searchBtn.classList.toggle("active");
         }
+
+        searchBar.onkeyup = ()=>{
+           
+            
+            let searchTerm = searchBar.value;
+             
+            if(searchTerm != ""){
+                searchBar.classList.add("active");
+            }else{
+                searchbar.classList.remove("active");
+            }
+
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", "php/search.php", true);
+            xhr.onload = ()=>{
+                if(xhr.readyState === XMLHttpRequest.DONE){
+                    if(xhr.status === 200){
+                        let data = xhr.response;
+                        //console.log(data);
+                        usersList.innerHTML = data;
+                    }
+                }
+            }
+            //we have to send form data through ajax to php
+
+            xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+            xhr.send("searchTerm=" + searchTerm); 
+        }
+
+        setInterval(() => {
+        
+            let xhr = new XMLHttpRequest();
+            xhr.open("GET", "php/users.php", true);
+            xhr.onload = ()=>{
+                if(xhr.readyState === XMLHttpRequest.DONE){
+                    if(xhr.status === 200){
+                        let data = xhr.response;
+                        //console.log(data);
+                        if(!searchBar.classList.contains("active")){ //if active not conatins in search bar class then add this
+                            usersList.innerHTML = data;
+                        }
+
+                    }
+                }
+            }
+            //we have to send form data through ajax to php
+
+           
+            xhr.send(); // sending the form data to php
+
+        }, 500);
     </script>
 </body>
 

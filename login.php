@@ -107,27 +107,74 @@
 </head>
 <body>
     <div class="wrapper">
-        <section class="form signup">
+        <section class="form login">
             <header>Realtime Chat App</header>
             <form action="#">
             <div class="error-txt">This is an error message!</div>
             <div class="name-details">
                 <div class="field input">
                     <label>Email Address</label>
-                    <input type="text" placeholder="Enter your email">
+                    <input type="text" name="email" placeholder="Enter your email">
                 </div>
                 <div class="field input">
                     <label>Password</label>
-                    <input type="text" placeholder="Enter new password">
+                    <input type="text" name="password" placeholder="Enter new password">
                     <i class="fa fa-eye"></i>
                 </div>
                 <div class="field button">
                     <input type="submit" value="Continue to Chat">
                 </div>
-                <div class="link">not yet signed up ?<a href="#">Signup Now</a></div>
+                <div class="link">not yet signed up ?<a href="index.php">Signup Now</a></div>
             </div>
            </form>
         </section>
     </div>
+    <script>
+       /* const pswrdField = document.querySelector(".form input[type='password']");
+        const toggleBtn = document.querySelector(".form .field i");
+        toggleBtn.onclick = ()=>{
+            if(pswrdField == "password"){
+                pswrdField.type = "text";
+                toggleBtn.classList.add("active");
+            }else{
+                pswrdField.type = "password";
+                toggleBtn.classList.remove("active");
+            }
+        }*/
+
+        const form = document.querySelector(".login form");
+        const continueBtn = form.querySelector(".button input");
+        const errorText = form.querySelector(".error-txt");
+        
+        form.onsubmit = (e)=>{
+            e.preventDefault(); //preventing form from submitting
+        }
+
+        continueBtn.onclick = ()=>{
+            console.log("hello");
+            //let's start Ajax
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", "php/login.php", true);
+            xhr.onload = ()=>{
+                if(xhr.readyState === XMLHttpRequest.DONE){
+                    if(xhr.status === 200){
+                        let data = xhr.response;
+                        console.log(data);
+                        if(data == "success"){
+                            location.href = "users.php";
+                        }else{
+                            errorText.textContent = data;
+                            errorText.style.display = "block";
+                        }
+                    }
+                }
+            }
+            //we have to send form data through ajax to php
+
+            let formData = new FormData(form); //create new FormData object
+            xhr.send(formData); // sending the form data to php
+        }
+
+    </script>
 </body>
 </html>

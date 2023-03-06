@@ -1,3 +1,9 @@
+<?php 
+session_start();
+if(!isset($_SESSION['unique_id'])){
+    header("location: login.php");
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -131,32 +137,83 @@
     <div class="wrapper">
         <section class="chat-area">
             <header>
-                <a href="#" class="back-icon"><i class="fa fa-arrow-left"></i></a>
-                <img src="dog.gif" alt="">
+                <?php 
+                   include_once "php/config.php";
+                   $user_id = mysqli_real_escape_string($conn, $_GET['user_id']);
+                   $sql = mysqli_query($conn, "SELECT * FROM users WHERE unique_id = {$user_id}");
+                   if(mysqli_num_rows($sql) > 0){
+                       $row = mysqli_fetch_assoc($sql);
+                   }
+                ?>
+                <a href="users.php" class="back-icon"><i class="fa fa-arrow-left"></i></a>
+                <img src="php/images/<?php echo $row['image']?>" alt="">
                 <div class="details">
-                    <span>Coding Nepal</span>
-                    <p>Active Now</p>
+                    <span><?php echo $row['fname'] . " " . $row['lname'] ?></span>
+                    <p><?php echo $row['status'] ?></p>
                 </div>
             </header>
             <div class="chat-box">
-                <div class="chat outgoing">
-                    <div class="details">
-                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. </p>
-                    </div>
-                </div>
-                <div class="chat incoming">
-                    <img src="dog.gif" alt="">
-                    <div class="details">
-                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>
-                    </div>
-                </div>
+               
+            
             </div>
-            <form action="#" class="typing-area">
-                <input type="text" placeholder="Type a message heree...">
+            <form action="#" class="typing-area" autocomplete="off">
+                <input type="text" name="outgoing_id" value="<?php echo $_SESSION['unique_id']; ?>" hidden>
+                <input type="text" name="incoming_id" value="<?php echo $user_id; ?>" hidden>
+                <input type="text" name="message" class="input-field" placeholder="Type a message heree...">
                 <button><i class="fa fa-telegram-plane"></i></button>
             </form>
         </section>
     </div>
-</body>
+    <script>
+        const form = document.querySelector(".typing-area");
+        inputField = form.querySelector(".input-field");
+        sendBtn = form.querySelector("button");
+        chatBox = document.querySelector(".chat-box");
 
+        form.onsubmit = (e)=>{
+            e.preventDefault(); //preventing form from submitting
+        }
+
+        sendBtn.onclick = ()=>{
+            let xhr = new XMLHttpRequest();
+            xhr.open("POST", "php/insert-chat.php", true);
+            xhr.onload = ()=>{
+                if(xhr.readyState === XMLHttpRequest.DONE){
+                    if(xhr.status === 200){
+                        let data = xhr.response;
+                        //console.log(data);
+                        console.log(data);
+                        inputField.value = ""; //once message inserted into database then leave blank the input fields
+                    }
+                }
+            }
+            //we have to send form data through ajax to php
+
+            let formData = new FormData(form); //create new FormData object
+            xhr.send(formData); // sending the form data to php
+        }
+
+        setInterval(() => {
+        
+        let xhr = new XMLHttpRequest();
+        xhr.open("POST", "php/get-chat.php", true);
+        xhr.onload = ()=>{
+            if(xhr.readyState === XMLHttpRequest.DONE){
+                if(xhr.status === 200){
+                    let data = xhr.response;
+                    console.log(data);
+                    chatBox.innerHTML = data;
+
+                }
+            }
+        }
+        //we have to send form data through ajax to php
+
+       
+        let formData = new FormData(form); //create new FormData object
+            xhr.send(formData); // sending the form data to php
+
+    }, 500);
+    </script>
+</body>
 </html>
